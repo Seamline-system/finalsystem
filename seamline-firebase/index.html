@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quotation System — SEAMLINE</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header>
+    <div>
+      <div class="logo"><img src="1.6.png" alt="SEAMLINE" style="height: 60px; margin-top:12px;"></div>
+      <div class="header-sub">Quotation Management System</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <div class="quote-count" id="quoteCount">0 quotes</div>
+      <div class="user-info" id="userInfo"></div>
+      <button class="btn-signout" id="signOutBtn" onclick="signOutUser()">Sign Out</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('new', this)">✦ New Quote</button>
+    <button class="tab-btn" onclick="switchTab('history', this)">◈ History</button>
+    <button class="tab-btn" onclick="switchTab('sales', this)">▲ Sales Tracker</button>
+    <button class="tab-btn" onclick="switchTab('clients', this)">👤 Clients</button>
+  </div>
+
+  <!-- NEW QUOTE PANEL -->
+  <div class="panel active" id="panel-new">
+    <div class="form-header">
+      <h2>Create New Quotation</h2>
+      <p>Fill in client details and product lines below. Profit margin is calculated automatically.</p>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group" style="position:relative;">
+        <label>Client / Company Name</label>
+        <input type="text" id="clientName" placeholder="Type to search or add client…"
+               autocomplete="off"
+               oninput="onClientNameInput(this.value)"
+               onfocus="onClientNameInput(this.value)"
+               onblur="setTimeout(hideClientDropdown, 180)">
+        <div id="clientDropdown" class="client-dropdown" style="display:none;"></div>
+      </div>
+      <div class="form-group">
+        <label>Quote Reference #</label>
+        <input type="text" id="quoteRef" placeholder="e.g. SL-0001-2026">
+      </div>
+      <div class="form-group">
+        <label>Client Contact</label>
+        <input type="text" id="clientContact" placeholder="Email or phone">
+      </div>
+      <div class="form-group">
+        <label>Quote Date</label>
+        <input type="date" id="quoteDate">
+      </div>
+      <div class="form-group full">
+        <label>Notes / Special Instructions</label>
+        <textarea id="quoteNotes" placeholder="Delivery terms, payment conditions, fabric requirements..."></textarea>
+      </div>
+    </div>
+
+    <!-- ORDER STATUS -->
+    <div class="status-section">
+      <label class="status-label">Order Status</label>
+      <div class="status-radio-group">
+        <label class="status-radio pending">
+          <input type="radio" name="orderStatus" value="pending" checked>
+          <span class="status-pill">⏳ Pending</span>
+        </label>
+        <label class="status-radio approved">
+          <input type="radio" name="orderStatus" value="approved">
+          <span class="status-pill">✓ Approved</span>
+        </label>
+        <label class="status-radio rejected">
+          <input type="radio" name="orderStatus" value="rejected">
+          <span class="status-pill">✕ Rejected</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="items-label-row">
+      <label>Line Items</label>
+      <span class="items-hint">SP − UP = Profit per unit</span>
+    </div>
+
+    <div class="items-section">
+      <div class="items-header">
+        <span>Product / Description</span>
+        <span>Unit Price (UP)</span>
+        <span>Selling Price (SP)</span>
+        <span>Qty</span>
+        <span>Profit</span>
+        <span></span>
+      </div>
+      <div id="itemsContainer"></div>
+      <button class="add-item-btn" onclick="addItem()">＋ Add Line Item</button>
+    </div>
+
+    <div class="summary-box">
+      <div class="summary-item">
+        <div class="summary-label">Total Cost (UP × Qty)</div>
+        <div class="summary-value" id="totalCost">Rs. 0.00</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">Total Revenue (SP × Qty)</div>
+        <div class="summary-value" id="totalRevenue">Rs. 0.00</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">Total Profit</div>
+        <div class="summary-value profit-val" id="totalProfit">Rs. 0.00</div>
+      </div>
+    </div>
+
+    <div class="formula-box">
+      <span class="formula-label">Profit Formula: </span>
+      <strong id="profitMarginText">—</strong>
+      <span class="formula-label" style="margin-left:24px;">Margin %: </span>
+      <strong id="marginPct">—</strong>
+    </div>
+
+    <!-- DESIGN / DRAFTS -->
+    <div class="design-section">
+      <div class="design-header">
+        <label>Design / Drafts</label>
+        <span class="items-hint">Image will appear in the PDF quotation</span>
+      </div>
+      <div class="design-upload-area" id="designUploadArea" onclick="document.getElementById('designImageInput').click()">
+        <div class="upload-placeholder" id="uploadPlaceholder">
+          <div class="upload-icon"></div>
+          <div class="upload-text">Click to upload design image</div>
+          <div class="upload-sub">PNG, JPG, JPEG supported</div>
+        </div>
+        <img id="designPreview" class="design-preview" style="display:none;" alt="Design preview">
+        <input type="file" id="designImageInput" accept="image/png,image/jpeg,image/jpg" style="display:none;" onchange="handleDesignUpload(event)">
+      </div>
+      <button class="remove-design-btn" id="removeDesignBtn" style="display:none;" onclick="removeDesign()">✕ Remove Image</button>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveQuote()">💾 Save Quote</button>
+      <button class="btn btn-secondary" onclick="generatePDF()">📄 Export PDF</button>
+      <button class="btn btn-danger" onclick="clearForm()">✕ Clear</button>
+    </div>
+  </div>
+
+  <!-- HISTORY PANEL -->
+  <div class="panel" id="panel-history">
+    <div class="history-header">
+      <h2>Quote History</h2>
+      <button class="btn btn-danger" onclick="clearAll()">Clear All</button>
+    </div>
+    <div id="historyContainer"></div>
+  </div>
+
+  <!-- SALES TRACKER PANEL -->
+  <div class="panel" id="panel-sales">
+
+    <div class="sales-header-row">
+      <div>
+        <h2 class="sales-title">Sales Tracker</h2>
+        <p class="sales-subtitle">Only <strong>approved</strong> quotes are counted toward revenue & profit.</p>
+      </div>
+      <div class="period-wrap">
+        <label class="period-label">Period</label>
+        <select class="period-select" id="periodSelect" onchange="renderSalesTracker()">
+          <option value="all">All Time</option>
+          <option value="month">This Month</option>
+          <option value="lastmonth">Last Month</option>
+          <option value="year">This Year</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid" id="kpiGrid">
+      <div class="kpi-card">
+        <div class="kpi-label">Total Revenue</div>
+        <div class="kpi-value" id="kpi-revenue">Rs. 0.00</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Total Profit</div>
+        <div class="kpi-value kpi-accent-green" id="kpi-profit">Rs. 0.00</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Approved Orders</div>
+        <div class="kpi-value" id="kpi-orders">0</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Avg Order Value</div>
+        <div class="kpi-value" id="kpi-avg">Rs. 0.00</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Profit Margin</div>
+        <div class="kpi-value kpi-accent-green" id="kpi-margin">0%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Unique Clients</div>
+        <div class="kpi-value" id="kpi-clients">0</div>
+      </div>
+    </div>
+
+    <!-- CHARTS ROW -->
+    <div class="sales-charts-row">
+      <!-- Monthly Performance -->
+      <div class="chart-card chart-card-wide">
+        <div class="chart-card-header">
+          <div class="chart-card-title">Monthly Performance</div>
+          <div class="chart-legend">
+            <span class="legend-dot legend-rev"></span> Revenue
+            <span class="legend-dot legend-profit" style="margin-left:12px;"></span> Profit
+          </div>
+        </div>
+        <div class="bar-chart-wrap" id="monthlyChart">
+          <div class="chart-empty">No approved orders in this period.</div>
+        </div>
+      </div>
+      <!-- Top Clients -->
+      <div class="chart-card chart-card-narrow">
+        <div class="chart-card-header">
+          <div class="chart-card-title">Top 5 Clients</div>
+          <div class="chart-legend"><span class="legend-dot legend-rev"></span> Revenue</div>
+        </div>
+        <div class="top-clients-wrap" id="topClientsChart">
+          <div class="chart-empty">No data yet.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLIENT PROFILES TABLE -->
+    <div class="client-table-card">
+      <div class="client-table-header">
+        <div class="chart-card-title">Client Profiles</div>
+        <div class="sort-controls">
+          <span class="sort-label">Sort by:</span>
+          <button class="sort-btn active" id="sort-revenue" onclick="setSortMode('revenue',this)">Revenue</button>
+          <button class="sort-btn" id="sort-profit" onclick="setSortMode('profit',this)">Profit</button>
+          <button class="sort-btn" id="sort-orders" onclick="setSortMode('orders',this)">Orders</button>
+        </div>
+      </div>
+      <div id="clientProfilesTable">
+        <div class="chart-empty" style="padding:40px;">No approved orders found.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
+  <!-- CLIENTS PANEL -->
+  <div class="panel" id="panel-clients">
+    <div class="clients-panel-header">
+      <div>
+        <h2 class="clients-title">Client Directory</h2>
+        <p class="clients-subtitle">Manage your clients and track their quote history.</p>
+      </div>
+      <button class="btn btn-primary" onclick="openClientModal()">＋ Add Client</button>
+    </div>
+    <div class="client-search-row">
+      <input type="text" id="clientDirSearch" placeholder="Search by name, contact, or email…" oninput="renderClientDirectory()" class="client-dir-search-input">
+    </div>
+    <div id="clientDirectoryContainer">
+      <div class="chart-empty" style="padding:60px 0;">No clients yet. Add your first client above.</div>
+    </div>
+  </div>
+
+  <!-- CLIENT MODAL -->
+  <div class="modal-overlay" id="clientModal" style="display:none;" onclick="closeClientModal(event)">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span id="clientModalTitle">Add Client</span>
+        <button class="modal-close-btn" onclick="closeClientModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Client / Company Name <span style="color:var(--danger)">*</span></label>
+            <input type="text" id="cm-name" placeholder="e.g. Sunrise Boutique">
+          </div>
+          <div class="form-group">
+            <label>Contact Person</label>
+            <input type="text" id="cm-contact" placeholder="Full name">
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="text" id="cm-phone" placeholder="+94 77 000 0000">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="cm-email" placeholder="client@example.com">
+          </div>
+          <div class="form-group full">
+            <label>Address</label>
+            <input type="text" id="cm-address" placeholder="Street, City">
+          </div>
+          <div class="form-group full">
+            <label>Notes</label>
+            <textarea id="cm-notes" placeholder="Any notes about this client…" style="min-height:70px;"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeClientModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveClient()">Save Client</button>
+      </div>
+    </div>
+  </div>
