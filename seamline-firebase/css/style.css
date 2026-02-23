@@ -1655,3 +1655,774 @@ textarea {
 
 /* Right-align number column headers */
 .cp-table th.num, .cp-table td.num { text-align: right; }
+
+/* ═══════════════════════════════════════════════
+   SEAMLINE — ANIMATIONS
+   Brutalist / Industrial motion design
+   Sharp entries, purposeful transitions
+   ═══════════════════════════════════════════════ */
+
+/* ── Global animation timing tokens ── */
+:root {
+  --ease-snap:   cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-sharp:  cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── Page load: header slides down ── */
+@keyframes headerDrop {
+  from { transform: translateY(-100%); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+
+header {
+  animation: headerDrop 0.5s var(--ease-snap) both;
+}
+
+/* ── Tabs bar slides in ── */
+@keyframes tabsSlide {
+  from { transform: translateX(-24px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+
+.tabs {
+  animation: tabsSlide 0.45s var(--ease-snap) 0.15s both;
+}
+
+/* ── Tab button: underline grows from left ── */
+.tab-btn::after {
+  transition: width 0.25s var(--ease-sharp), background-color 0.2s;
+  transform-origin: left;
+}
+
+.tab-btn {
+  transition: color 0.2s, background 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ripple flash on click */
+.tab-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.12);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s var(--ease-sharp);
+}
+
+.tab-btn:active::before { transform: scaleX(1); }
+
+/* ── Panel: sharp wipe-in from left ── */
+@keyframes panelReveal {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.panel.active {
+  animation: panelReveal 0.35s var(--ease-snap) both;
+}
+
+/* ── KPI cards: staggered rise ── */
+@keyframes cardRise {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.kpi-card {
+  animation: cardRise 0.4s var(--ease-snap) both;
+  transition: box-shadow 0.2s, transform 0.2s var(--ease-snap);
+}
+
+.kpi-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.kpi-grid .kpi-card:nth-child(1) { animation-delay: 0.05s; }
+.kpi-grid .kpi-card:nth-child(2) { animation-delay: 0.10s; }
+.kpi-grid .kpi-card:nth-child(3) { animation-delay: 0.15s; }
+.kpi-grid .kpi-card:nth-child(4) { animation-delay: 0.20s; }
+.kpi-grid .kpi-card:nth-child(5) { animation-delay: 0.25s; }
+.kpi-grid .kpi-card:nth-child(6) { animation-delay: 0.30s; }
+
+/* ── Quote cards: sequential slide-in ── */
+@keyframes quoteSlide {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.quote-card {
+  animation: quoteSlide 0.3s var(--ease-snap) both;
+  transition: box-shadow 0.2s, transform 0.18s var(--ease-snap), border-color 0.2s;
+}
+
+.quote-card:hover {
+  transform: translateX(4px);
+  box-shadow: -4px 0 0 var(--black), 4px 4px 0 var(--black);
+}
+
+/* ── Buttons: press-down feel ── */
+.btn {
+  transition: transform 0.12s var(--ease-sharp), box-shadow 0.12s, background 0.15s, color 0.15s;
+}
+
+.btn:hover  { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+.btn:active { transform: translateY(1px);  box-shadow: none; }
+
+.btn-primary:hover   { box-shadow: 3px 3px 0 rgba(0,0,0,0.35); }
+.btn-secondary:hover { box-shadow: 3px 3px 0 rgba(0,0,0,0.2); }
+
+/* ── Add item button pulse ── */
+@keyframes subtlePulse {
+  0%, 100% { box-shadow: none; }
+  50%       { box-shadow: 0 0 0 3px rgba(0,0,0,0.08); }
+}
+
+.add-item-btn {
+  transition: background 0.15s, color 0.15s, transform 0.12s var(--ease-snap);
+}
+
+.add-item-btn:hover { transform: translateY(-1px); }
+.add-item-btn:active { transform: translateY(1px); }
+
+/* ── Summary box: numbers count up (CSS only — fade+scale) ── */
+@keyframes numPop {
+  from { transform: scale(0.85); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+.summary-value {
+  animation: numPop 0.3s var(--ease-bounce) both;
+  display: inline-block;
+}
+
+/* ── Chart bars: grow from bottom ── */
+@keyframes barGrow {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+.bar-rev, .bar-profit {
+  transform-origin: bottom;
+  animation: barGrow 0.5s var(--ease-snap) both;
+}
+
+/* ── Top client bars: grow from left ── */
+@keyframes barHoriz {
+  from { width: 0 !important; }
+  to   { /* final width set inline */ }
+}
+
+.tc-bar-fill {
+  animation: barHoriz 0.6s var(--ease-snap) both;
+}
+
+/* ── Client directory cards: staggered reveal ── */
+@keyframes clientCardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.client-dir-card {
+  animation: clientCardIn 0.3s var(--ease-snap) both;
+  transition: box-shadow 0.2s, transform 0.18s var(--ease-snap);
+}
+
+.client-dir-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1), 4px 4px 0 var(--black);
+}
+
+/* ── Modal: scale in from center ── */
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.94) translateY(8px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+.modal-box {
+  animation: modalIn 0.28s var(--ease-bounce) both;
+}
+
+/* ── Mini buttons: pop on hover ── */
+.mini-btn {
+  transition: background 0.15s, color 0.15s, transform 0.12s var(--ease-snap), box-shadow 0.12s;
+}
+
+.mini-btn:hover  { transform: translateY(-1px); box-shadow: 2px 2px 0 rgba(0,0,0,0.25); }
+.mini-btn:active { transform: translateY(0); box-shadow: none; }
+
+/* ── Sign out button ── */
+.btn-signout {
+  transition: background 0.15s, color 0.15s, transform 0.12s var(--ease-snap);
+}
+
+.btn-signout:hover  { transform: translateY(-1px); }
+.btn-signout:active { transform: translateY(1px); }
+
+/* ── Form inputs: focus border slide ── */
+input, textarea, select {
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus, textarea:focus, select:focus {
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.15);
+}
+
+/* ── Item rows: slide in when added ── */
+@keyframes itemIn {
+  from { opacity: 0; transform: translateX(-10px); max-height: 0; }
+  to   { opacity: 1; transform: translateX(0);     max-height: 100px; }
+}
+
+.item-row {
+  animation: itemIn 0.25s var(--ease-snap) both;
+}
+
+/* ── Status pills: flip on select ── */
+.status-pill {
+  transition: background 0.2s, color 0.2s, transform 0.15s var(--ease-bounce), box-shadow 0.2s;
+}
+
+.status-radio input:checked + .status-pill {
+  transform: scale(1.04);
+}
+
+/* ── Logo: subtle entrance ── */
+@keyframes logoIn {
+  from { opacity: 0; letter-spacing: 6px; transform: skewX(-2deg); }
+  to   { opacity: 1; letter-spacing: normal; transform: skewX(0); }
+}
+
+.logo img {
+  animation: logoIn 0.6s var(--ease-snap) 0.1s both;
+}
+
+/* ── Client autocomplete dropdown ── */
+@keyframes dropdownOpen {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.client-dropdown[style*="block"] {
+  animation: dropdownOpen 0.18s var(--ease-snap) both;
+}
+
+/* ── Drawer: row hover line ── */
+.cp-table-row {
+  transition: background 0.12s;
+}
+
+/* ── CP stat value count-fade ── */
+@keyframes statFade {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.cp-stat-val {
+  animation: statFade 0.3s var(--ease-snap) both;
+}
+
+/* ── PDF button: slide-shimmer ── */
+.cp-pdf-btn {
+  overflow: hidden;
+  position: relative;
+}
+
+.cp-pdf-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
+  transform: translateX(-100%);
+  transition: transform 0.35s var(--ease-sharp);
+}
+
+.cp-pdf-btn:hover::after { transform: translateX(100%); }
+
+/* ── Chart card hover lift ── */
+.chart-card {
+  transition: box-shadow 0.2s, transform 0.2s var(--ease-snap);
+}
+
+.chart-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.1);
+}
+
+/* ── Toast: upgrade to slide + bounce ── */
+.toast {
+  transition: all 0.4s var(--ease-bounce) !important;
+}
+
+/* ── Scrollbar: minimal & branded ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--off-white); }
+::-webkit-scrollbar-thumb { background: var(--black); }
+::-webkit-scrollbar-thumb:hover { background: var(--dark-grey); }
+
+/* ── Design upload area ── */
+.design-upload-area {
+  transition: border-color 0.2s, background 0.2s, transform 0.15s var(--ease-snap);
+}
+
+.design-upload-area:hover {
+  transform: translateY(-1px);
+  box-shadow: 4px 4px 0 var(--black);
+}
+
+/* ── Respect reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   LOADING SCREEN
+   ═══════════════════════════════════════════════ */
+
+#loadingScreen {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#loadingScreen.ls-hide {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(1.04);
+}
+
+.ls-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+
+/* Logo: fades + scales in */
+@keyframes lsLogoIn {
+  0%   { opacity: 0; transform: scale(0.88) translateY(12px); filter: blur(6px); }
+  60%  { opacity: 1; filter: blur(0); }
+  100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+}
+
+.ls-logo {
+  width: 260px;
+  max-width: 70vw;
+  /* white logo on black bg — 1.6.png is the white-on-black version */
+  animation: lsLogoIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+/* Loading bar */
+.ls-bar-wrap {
+  width: 200px;
+  height: 2px;
+  background: rgba(255,255,255,0.12);
+  overflow: hidden;
+  animation: lsLogoIn 0.5s ease 0.5s both;
+}
+
+@keyframes lsBarFill {
+  0%   { transform: translateX(-100%); }
+  40%  { transform: translateX(-20%); }
+  100% { transform: translateX(0%); }
+}
+
+.ls-bar {
+  height: 100%;
+  width: 100%;
+  background: #fff;
+  transform: translateX(-100%);
+  animation: lsBarFill 1.4s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
+}
+
+/* Tagline */
+@keyframes lsTagIn {
+  from { opacity: 0; letter-spacing: 6px; }
+  to   { opacity: 1; letter-spacing: 3px; }
+}
+
+.ls-tagline {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  animation: lsTagIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
+}
+
+/* ═══════════════════════════════════════════════
+   BATCH 2 — HISTORY SEARCH, CSV, PAYMENTS
+   ═══════════════════════════════════════════════ */
+
+/* ── History Filters Bar ── */
+.history-filters {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 0 20px 0;
+  flex-wrap: wrap;
+}
+
+.history-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 220px;
+  max-width: 400px;
+}
+
+.history-search-icon {
+  position: absolute;
+  left: 12px;
+  font-size: 14px;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.history-search-input {
+  width: 100%;
+  padding: 10px 36px 10px 36px;
+  border: 2px solid var(--light-grey);
+  background: var(--white);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--black);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.history-search-input:focus {
+  border-color: var(--black);
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+}
+
+.history-search-clear {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--mid-grey);
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s;
+}
+
+.history-search-clear:hover { color: var(--black); }
+
+/* ── Filter Pills ── */
+.history-filter-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-pill {
+  padding: 7px 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  border: 2px solid var(--light-grey);
+  background: var(--white);
+  color: var(--mid-grey);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.filter-pill:hover { border-color: var(--black); color: var(--black); }
+
+.filter-pill.active {
+  background: var(--black);
+  color: var(--white);
+  border-color: var(--black);
+}
+
+.filter-pill.pill-pending.active  { background: #854d0e; border-color: #854d0e; }
+.filter-pill.pill-approved.active { background: var(--success); border-color: var(--success); }
+.filter-pill.pill-approved2.active { background: #16a34a; border-color: #16a34a; }
+.filter-pill.pill-rejected.active { background: var(--danger); border-color: var(--danger); }
+
+.history-results-count {
+  font-size: 12px;
+  color: var(--mid-grey);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ── Search highlight ── */
+mark.hl {
+  background: #fef08a;
+  color: var(--black);
+  padding: 0 1px;
+  border-radius: 2px;
+}
+
+/* ── Custom Date Range ── */
+.custom-date-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.custom-date-range input[type="date"] {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  padding: 8px 10px;
+  border: 2px solid var(--light-grey);
+  background: var(--white);
+  color: var(--black);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.custom-date-range input[type="date"]:focus { border-color: var(--black); }
+
+.date-range-sep {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--mid-grey);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ── Payments Panel ── */
+.payments-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.payments-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+
+.payments-subtitle {
+  font-size: 13px;
+  color: var(--mid-grey);
+}
+
+.payments-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.pay-kpi-card {
+  background: var(--white);
+  border: 2px solid var(--black);
+  padding: 16px;
+  text-align: center;
+}
+
+.pay-kpi-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--mid-grey);
+  margin-bottom: 8px;
+}
+
+.pay-kpi-val {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--black);
+}
+
+.payments-filters {
+  margin-bottom: 20px;
+}
+
+/* ── Payment Card ── */
+.payment-card {
+  background: var(--white);
+  border: 2px solid var(--black);
+  padding: 20px 24px;
+  margin-bottom: 12px;
+  animation: quoteSlide 0.3s var(--ease-snap) both;
+}
+
+.payment-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.payment-ref {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.payment-client {
+  font-size: 13px;
+  color: var(--mid-grey);
+}
+
+.payment-amounts {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.pa-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.pa-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--mid-grey);
+}
+
+.pa-val {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--black);
+}
+
+/* ── Payment Progress Bar ── */
+.payment-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.payment-progress-track {
+  flex: 1;
+  height: 6px;
+  background: var(--light-grey);
+  overflow: hidden;
+}
+
+.payment-progress-fill {
+  height: 100%;
+  transition: width 0.6s var(--ease-snap);
+}
+
+.ps-paid    .payment-progress-fill,
+.payment-progress-fill.ps-paid    { background: var(--success); }
+.payment-progress-fill.ps-partial { background: #f59e0b; }
+.payment-progress-fill.ps-unpaid  { background: var(--light-grey); width: 0 !important; }
+
+.payment-pct {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--mid-grey);
+  white-space: nowrap;
+  min-width: 90px;
+  text-align: right;
+}
+
+/* ── Payment Status Badge ── */
+.ps-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 2px;
+}
+
+.ps-paid    { background: #dcfce7; color: #15803d; }
+.ps-partial { background: #fef9c3; color: #92400e; }
+.ps-unpaid  { background: #fee2e2; color: #991b1b; }
+
+/* ── Payment Actions ── */
+.payment-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.payment-status-select {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border: 2px solid var(--light-grey);
+  background: var(--white);
+  color: var(--black);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.payment-status-select:focus { border-color: var(--black); }
+
+.payment-amount-input-wrap {
+  display: flex;
+  align-items: center;
+  border: 2px solid var(--light-grey);
+  background: var(--white);
+  transition: border-color 0.2s;
+}
+
+.payment-amount-input-wrap:focus-within { border-color: var(--black); }
+
+.pa-currency {
+  padding: 8px 8px 8px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--mid-grey);
+  background: var(--off-white);
+  border-right: 1px solid var(--light-grey);
+}
+
+.payment-amount-input {
+  border: none;
+  outline: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  padding: 8px 12px;
+  width: 120px;
+  color: var(--black);
+  background: var(--white);
+}
+
+@media (max-width: 640px) {
+  .history-filters { flex-direction: column; align-items: flex-start; }
+  .history-search-wrap { max-width: 100%; }
+  .payment-card-top { flex-direction: column; }
+  .payment-amounts { flex-direction: row; justify-content: flex-start; }
+  .pa-item { align-items: flex-start; }
+}
