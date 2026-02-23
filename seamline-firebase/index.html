@@ -159,7 +159,6 @@
 
   <!-- SALES TRACKER PANEL -->
   <div class="panel" id="panel-sales">
-
     <div class="sales-header-row">
       <div>
         <h2 class="sales-title">Sales Tracker</h2>
@@ -176,37 +175,16 @@
       </div>
     </div>
 
-    <!-- KPI CARDS -->
     <div class="kpi-grid" id="kpiGrid">
-      <div class="kpi-card">
-        <div class="kpi-label">Total Revenue</div>
-        <div class="kpi-value" id="kpi-revenue">Rs. 0.00</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Total Profit</div>
-        <div class="kpi-value kpi-accent-green" id="kpi-profit">Rs. 0.00</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Approved Orders</div>
-        <div class="kpi-value" id="kpi-orders">0</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Avg Order Value</div>
-        <div class="kpi-value" id="kpi-avg">Rs. 0.00</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Profit Margin</div>
-        <div class="kpi-value kpi-accent-green" id="kpi-margin">0%</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Unique Clients</div>
-        <div class="kpi-value" id="kpi-clients">0</div>
-      </div>
+      <div class="kpi-card"><div class="kpi-label">Total Revenue</div><div class="kpi-value" id="kpi-revenue">Rs. 0.00</div></div>
+      <div class="kpi-card"><div class="kpi-label">Total Profit</div><div class="kpi-value kpi-accent-green" id="kpi-profit">Rs. 0.00</div></div>
+      <div class="kpi-card"><div class="kpi-label">Approved Orders</div><div class="kpi-value" id="kpi-orders">0</div></div>
+      <div class="kpi-card"><div class="kpi-label">Avg Order Value</div><div class="kpi-value" id="kpi-avg">Rs. 0.00</div></div>
+      <div class="kpi-card"><div class="kpi-label">Profit Margin</div><div class="kpi-value kpi-accent-green" id="kpi-margin">0%</div></div>
+      <div class="kpi-card"><div class="kpi-label">Unique Clients</div><div class="kpi-value" id="kpi-clients">0</div></div>
     </div>
 
-    <!-- CHARTS ROW -->
     <div class="sales-charts-row">
-      <!-- Monthly Performance -->
       <div class="chart-card chart-card-wide">
         <div class="chart-card-header">
           <div class="chart-card-title">Monthly Performance</div>
@@ -215,23 +193,17 @@
             <span class="legend-dot legend-profit" style="margin-left:12px;"></span> Profit
           </div>
         </div>
-        <div class="bar-chart-wrap" id="monthlyChart">
-          <div class="chart-empty">No approved orders in this period.</div>
-        </div>
+        <div class="bar-chart-wrap" id="monthlyChart"><div class="chart-empty">No approved orders in this period.</div></div>
       </div>
-      <!-- Top Clients -->
       <div class="chart-card chart-card-narrow">
         <div class="chart-card-header">
           <div class="chart-card-title">Top 5 Clients</div>
           <div class="chart-legend"><span class="legend-dot legend-rev"></span> Revenue</div>
         </div>
-        <div class="top-clients-wrap" id="topClientsChart">
-          <div class="chart-empty">No data yet.</div>
-        </div>
+        <div class="top-clients-wrap" id="topClientsChart"><div class="chart-empty">No data yet.</div></div>
       </div>
     </div>
 
-    <!-- CLIENT PROFILES TABLE -->
     <div class="client-table-card">
       <div class="client-table-header">
         <div class="chart-card-title">Client Profiles</div>
@@ -242,18 +214,10 @@
           <button class="sort-btn" id="sort-orders" onclick="setSortMode('orders',this)">Orders</button>
         </div>
       </div>
-      <div id="clientProfilesTable">
-        <div class="chart-empty" style="padding:40px;">No approved orders found.</div>
-      </div>
+      <div id="clientProfilesTable"><div class="chart-empty" style="padding:40px;">No approved orders found.</div></div>
     </div>
-
   </div>
 
-  <div class="toast" id="toast"></div>
-
-  <script type="module" src="js/app.js"></script>
-</body>
-</html>
   <!-- CLIENTS PANEL -->
   <div class="panel" id="panel-clients">
     <div class="clients-panel-header">
@@ -312,3 +276,30 @@
       </div>
     </div>
   </div>
+
+  <!-- CLIENT PROFILE DRAWER -->
+  <div class="cp-overlay" id="cpOverlay" onclick="closeClientProfile(event)">
+    <div class="cp-drawer" id="cpDrawer">
+      <div class="cp-drawer-header">
+        <div>
+          <div class="cp-drawer-name" id="cpName">—</div>
+          <div class="cp-drawer-meta" id="cpMeta"></div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <button class="btn btn-primary" id="cpNewQuoteBtn">✦ New Quote</button>
+          <button class="cp-close-btn" onclick="closeClientProfile()">✕</button>
+        </div>
+      </div>
+      <div class="cp-stats-strip" id="cpStats"></div>
+      <div class="cp-section-title">Order History</div>
+      <div id="cpOrdersWrap">
+        <div class="chart-empty" style="padding:32px 0;">No quotes found for this client.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
