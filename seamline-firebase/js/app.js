@@ -829,13 +829,13 @@ window.renderClientDirectory = function() {
     const cProfit    = cApproved.reduce((s,q) => s + (q.profit||0), 0);
 
     return `
-    <div class="client-dir-card">
+    <div class="client-dir-card" onclick="openClientProfile('${c._docId}')" style="cursor:pointer;">
       <div class="client-dir-card-header">
         <div class="client-dir-name">${c.name}</div>
         <div class="client-dir-actions">
-          <button class="mini-btn" onclick="startQuoteForClient('${c._docId}')">✦ New Quote</button>
-          <button class="mini-btn" onclick="openClientModal('${c._docId}')">✏️ Edit</button>
-          <button class="mini-btn del" onclick="deleteClient('${c._docId}')">🗑</button>
+          <button class="mini-btn" onclick="event.stopPropagation();startQuoteForClient('${c._docId}')">✦ New Quote</button>
+          <button class="mini-btn" onclick="event.stopPropagation();openClientModal('${c._docId}')">✏️ Edit</button>
+          <button class="mini-btn del" onclick="event.stopPropagation();deleteClient('${c._docId}')">🗑</button>
         </div>
       </div>
       <div class="client-dir-details">
@@ -1030,3 +1030,154 @@ function highlight(text, query) {
     `<mark class="cd-highlight">${text.slice(idx, idx + query.length)}</mark>` +
     text.slice(idx + query.length);
 }
+// ═══════════════════════════════════════════════
+// CLIENT PROFILE DRAWER
+// ═══════════════════════════════════════════════
+
+window.openClientProfile = function(docId) {
+  const c = clients.find(c => c._docId === docId);
+  if (!c) return;
+
+  // Header
+  document.getElementById('cpName').textContent = c.name;
+  const metaParts = [
+    c.contact ? `👤 ${c.contact}` : '',
+    c.phone   ? `📞 ${c.phone}`   : '',
+    c.email   ? `✉️ ${c.email}`   : '',
+    c.address ? `📍 ${c.address}` : '',
+  ].filter(Boolean);
+  document.getElementById('cpMeta').innerHTML = metaParts.join('<span class="cp-meta-sep">·</span>') || '—';
+
+  // Wire up New Quote button
+  document.getElementById('cpNewQuoteBtn').onclick = () => {
+    closeClientProfile();
+    startQuoteForClient(docId);
+  };
+
+  // Aggregate quotes for this client
+  const cQuotes   = quotes.filter(q => (q.client||'').toLowerCase() === (c.name||'').toLowerCase());
+  const cApproved = cQuotes.filter(q => q.status === 'approved');
+  const cPending  = cQuotes.filter(q => (q.status||'pending') === 'pending');
+  const cRejected = cQuotes.filter(q => q.status === 'rejected');
+  const cRevenue  = cApproved.reduce((s,q) => s + (q.totalRev||0), 0);
+  const cProfit   = cApproved.reduce((s,q) => s + (q.profit||0), 0);
+  const margin    = cRevenue > 0 ? ((cProfit/cRevenue)*100).toFixed(1) : '0.0';
+
+  // Stats strip
+  document.getElementById('cpStats').innerHTML = `
+    <div class="cp-stat"><div class="cp-stat-label">Total Quotes</div><div class="cp-stat-val">${cQuotes.length}</div></div>
+    <div class="cp-stat"><div class="cp-stat-label">Approved</div><div class="cp-stat-val" style="color:#22c55e;">${cApproved.length}</div></div>
+    <div class="cp-stat"><div class="cp-stat-label">Pending</div><div class="cp-stat-val">${cPending.length}</div></div>
+    <div class="cp-stat"><div class="cp-stat-label">Rejected</div><div class="cp-stat-val" style="color:#ef4444;">${cRejected.length}</div></div>
+    <div class="cp-stat"><div class="cp-stat-label">Total Revenue</div><div class="cp-stat-val">Rs.${cRevenue.toLocaleString('en-US',{minimumFractionDigits:2})}</div></div>
+    <div class="cp-stat"><div class="cp-stat-label">Total Profit</div><div class="cp-stat-val" style="color:#22c55e;">Rs.${cProfit.toLocaleString('en-US',{minimumFractionDigits:2})}</div></div>
+    <div class="cp-stat"><div class="cp-stat-label">Profit Margin</div><div class="cp-stat-val">${margin}%</div></div>
+  `;
+
+  // Orders table
+  const wrap = document.getElementById('cpOrdersWrap');
+  if (!cQuotes.length) {
+    wrap.innerHTML = `<div class="chart-empty" style="padding:32px 0;">No quotes found for this client.</div>`;
+  } else {
+    const sorted = [...cQuotes].sort((a,b) => new Date(b.date||b.createdAt||0) - new Date(a.date||a.createdAt||0));
+    wrap.innerHTML = `
+      <table class="cp-table">
+        <thead>
+          <tr>
+            <th>Ref #</th>
+            <th>Date</th>
+            <th>Items</th>
+            <th style="text-align:right;">Revenue</th>
+            <th style="text-align:right;">Profit</th>
+            <th>Status</th>
+            <th>Action</th>
+            <th>PDF</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${sorted.map(q => {
+            const status = q.status || 'pending';
+            const sc = status === 'approved' ? 'cp-badge-approved' : status === 'rejected' ? 'cp-badge-rejected' : 'cp-badge-pending';
+            const sl = status === 'approved' ? '✓ Approved' : status === 'rejected' ? '✕ Rejected' : '⏳ Pending';
+            const itemCount = (q.items||[]).length;
+            // Build action buttons based on current status
+            const actionBtns = status === 'approved'
+              ? `<button class="cp-status-btn cp-status-reject" onclick="drawerUpdateStatus('${q._docId}','rejected','${c._docId}')">✕ Reject</button>`
+              : status === 'rejected'
+              ? `<button class="cp-status-btn cp-status-approve" onclick="drawerUpdateStatus('${q._docId}','approved','${c._docId}')">✓ Approve</button>`
+              : `<button class="cp-status-btn cp-status-approve" onclick="drawerUpdateStatus('${q._docId}','approved','${c._docId}')">✓ Approve</button>
+                 <button class="cp-status-btn cp-status-reject" onclick="drawerUpdateStatus('${q._docId}','rejected','${c._docId}')">✕ Reject</button>`;
+            return `<tr class="cp-table-row" id="cptr-${q._docId}">
+              <td class="cp-ref">${q.ref||'—'}</td>
+              <td>${q.date||'—'}</td>
+              <td>${itemCount} item${itemCount!==1?'s':''}</td>
+              <td style="text-align:right;">Rs.${(q.totalRev||0).toLocaleString('en-US',{minimumFractionDigits:2})}</td>
+              <td style="text-align:right;color:#22c55e;">Rs.${(q.profit||0).toLocaleString('en-US',{minimumFractionDigits:2})}</td>
+              <td><span class="cp-badge ${sc}" id="cpbadge-${q._docId}">${sl}</span></td>
+              <td class="cp-action-cell">${actionBtns}</td>
+              <td><button class="cp-pdf-btn" onclick="pdfFromHistory('${q._docId}')">📄 PDF</button></td>
+              <td><button class="cp-del-btn" onclick="drawerDeleteQuote('${q._docId}','${c._docId}')" title="Delete">🗑</button></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  // Show drawer
+  const overlay = document.getElementById('cpOverlay');
+  overlay.style.display = 'flex';
+  requestAnimationFrame(() => overlay.classList.add('cp-open'));
+  document.body.style.overflow = 'hidden';
+};
+
+window.drawerUpdateStatus = async function(quoteDocId, newStatus, clientDocId) {
+  try {
+    await updateDoc(doc(db, 'quotes', quoteDocId), { status: newStatus });
+
+    // Update badge in place immediately
+    const badge = document.getElementById(`cpbadge-${quoteDocId}`);
+    const row   = document.getElementById(`cptr-${quoteDocId}`);
+    if (badge) {
+      badge.className = 'cp-badge ' + (newStatus === 'approved' ? 'cp-badge-approved' : 'cp-badge-rejected');
+      badge.textContent = newStatus === 'approved' ? '✓ Approved' : '✕ Rejected';
+    }
+    // Swap the action buttons
+    const actionCell = row?.querySelector('.cp-action-cell');
+    if (actionCell) {
+      actionCell.innerHTML = newStatus === 'approved'
+        ? `<button class="cp-status-btn cp-status-reject" onclick="drawerUpdateStatus('${quoteDocId}','rejected','${clientDocId}')">✕ Reject</button>`
+        : `<button class="cp-status-btn cp-status-approve" onclick="drawerUpdateStatus('${quoteDocId}','approved','${clientDocId}')">✓ Approve</button>`;
+    }
+    // Refresh the stats strip to reflect new numbers
+    openClientProfile(clientDocId);
+    showToast(`✓ Marked as ${newStatus}`);
+  } catch(e) {
+    console.error(e);
+    showToast('❌ Failed to update status');
+  }
+};
+
+window.drawerDeleteQuote = async function(quoteDocId, clientDocId) {
+  if (!confirm('Delete this quote permanently?')) return;
+  try {
+    await deleteDoc(doc(db, 'quotes', quoteDocId));
+    // Remove row from table immediately
+    const row = document.getElementById(`cptr-${quoteDocId}`);
+    if (row) row.remove();
+    // Refresh stats strip
+    openClientProfile(clientDocId);
+    showToast('Quote deleted');
+  } catch(e) {
+    console.error(e);
+    showToast('❌ Failed to delete quote');
+  }
+};
+
+window.closeClientProfile = function(e) {
+  if (e && e.target !== document.getElementById('cpOverlay')) return;
+  const overlay = document.getElementById('cpOverlay');
+  overlay.classList.remove('cp-open');
+  setTimeout(() => { overlay.style.display = 'none'; }, 300);
+  document.body.style.overflow = '';
+};
