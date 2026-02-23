@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#000;">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +7,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Hide entire app until Firebase confirms auth — prevents dashboard flash */
+    body { visibility: hidden; }
+  </style>
 </head>
 <body>
 
@@ -27,6 +31,7 @@
     <button class="tab-btn" onclick="switchTab('history', this)">◈ History</button>
     <button class="tab-btn" onclick="switchTab('sales', this)">▲ Sales Tracker</button>
     <button class="tab-btn" onclick="switchTab('clients', this)">👤 Clients</button>
+    <button class="tab-btn" onclick="switchTab('payments', this)">💰 Payments</button>
   </div>
 
   <!-- NEW QUOTE PANEL -->
@@ -142,8 +147,8 @@
     </div>
 
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="saveQuote()">💾 Save Quote</button>
-      <button class="btn btn-secondary" onclick="generatePDF()">📄 Export PDF</button>
+      <button class="btn btn-primary" onclick="saveQuote()">Save Quote</button>
+      <button class="btn btn-secondary" onclick="generatePDF()">Export PDF</button>
       <button class="btn btn-danger" onclick="clearForm()">✕ Clear</button>
     </div>
   </div>
@@ -152,7 +157,24 @@
   <div class="panel" id="panel-history">
     <div class="history-header">
       <h2>Quote History</h2>
-      <button class="btn btn-danger" onclick="clearAll()">Clear All</button>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button class="btn btn-secondary" onclick="exportCSV()">&#11015; Export CSV</button>
+        <button class="btn btn-danger" onclick="clearAll()">Clear All</button>
+      </div>
+    </div>
+    <div class="history-filters">
+      <div class="history-search-wrap">
+        <span class="history-search-icon">&#128269;</span>
+        <input type="text" id="historySearch" class="history-search-input" placeholder="Search by client, ref, contact, notes&hellip;" oninput="onHistorySearch(this.value)">
+        <button class="history-search-clear" id="historySearchClear" onclick="clearHistorySearch()" style="display:none;">&#10005;</button>
+      </div>
+      <div class="history-filter-pills">
+        <button class="filter-pill active" onclick="setHistoryFilter('all',this)">All</button>
+        <button class="filter-pill pill-pending" onclick="setHistoryFilter('pending',this)">Pending</button>
+        <button class="filter-pill pill-approved" onclick="setHistoryFilter('approved',this)">Approved</button>
+        <button class="filter-pill pill-rejected" onclick="setHistoryFilter('rejected',this)">Rejected</button>
+      </div>
+      <div class="history-results-count" id="historyResultsCount"></div>
     </div>
     <div id="historyContainer"></div>
   </div>
@@ -166,12 +188,18 @@
       </div>
       <div class="period-wrap">
         <label class="period-label">Period</label>
-        <select class="period-select" id="periodSelect" onchange="renderSalesTracker()">
+        <select class="period-select" id="periodSelect" onchange="onPeriodChange()">
           <option value="all">All Time</option>
           <option value="month">This Month</option>
           <option value="lastmonth">Last Month</option>
           <option value="year">This Year</option>
+          <option value="custom">Custom Range</option>
         </select>
+        <div class="custom-date-range" id="customDateRange" style="display:none;">
+          <input type="date" id="dateFrom" onchange="renderSalesTracker()">
+          <span class="date-range-sep">to</span>
+          <input type="date" id="dateTo" onchange="renderSalesTracker()">
+        </div>
       </div>
     </div>
 
@@ -216,6 +244,28 @@
       </div>
       <div id="clientProfilesTable"><div class="chart-empty" style="padding:40px;">No approved orders found.</div></div>
     </div>
+  </div>
+
+
+  <!-- PAYMENTS PANEL -->
+  <div class="panel" id="panel-payments">
+    <div class="payments-header-row">
+      <div>
+        <h2 class="payments-title">Outstanding Payments</h2>
+        <p class="payments-subtitle">Track payment status on approved quotes.</p>
+      </div>
+      <button class="btn btn-secondary" onclick="exportPaymentsCSV()">&#11015; Export CSV</button>
+    </div>
+    <div class="payments-kpi-row" id="paymentsKpi"></div>
+    <div class="payments-filters">
+      <div class="history-filter-pills">
+        <button class="filter-pill active" onclick="setPaymentFilter('all',this)">All</button>
+        <button class="filter-pill pill-pending" onclick="setPaymentFilter('unpaid',this)">Unpaid</button>
+        <button class="filter-pill pill-approved" onclick="setPaymentFilter('partial',this)">Partial</button>
+        <button class="filter-pill pill-approved2" onclick="setPaymentFilter('paid',this)">Paid</button>
+      </div>
+    </div>
+    <div id="paymentsContainer"></div>
   </div>
 
   <!-- CLIENTS PANEL -->
