@@ -8,11 +8,111 @@
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <style>
-    /* Hide entire app until Firebase confirms auth — prevents dashboard flash */
-    body { visibility: hidden; }
+    /* ── Post-Login Loading Screen ── */
+    #appLoader {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 36px;
+    }
+    #appLoader.fade-out {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s cubic-bezier(0.4,0,0.2,1);
+    }
+    #appLoader .al-logo {
+      width: 270px;
+      animation: alLogoIn 0.45s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    #appLoader .al-bar-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      opacity: 0;
+      animation: alFadeUp 0.4s ease both 0.35s;
+    }
+    #appLoader .al-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 3.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.38);
+    }
+    #appLoader .al-track {
+      width: 190px;
+      height: 2px;
+      background: rgba(255,255,255,0.1);
+      overflow: hidden;
+    }
+    #appLoader .al-fill {
+      height: 100%;
+      width: 0;
+      background: #fff;
+      animation: alBarFill 0.8s cubic-bezier(0.4,0,0.2,1) 0.3s both;
+    }
+    #appLoader .al-dots {
+      display: flex;
+      gap: 7px;
+      opacity: 0;
+      animation: alFadeUp 0.35s ease both 0.55s;
+    }
+    #appLoader .al-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      animation: alDotPulse 1.3s ease-in-out infinite;
+    }
+    #appLoader .al-dot:nth-child(2) { animation-delay: 0.22s; }
+    #appLoader .al-dot:nth-child(3) { animation-delay: 0.55s; }
+
+    @keyframes alLogoIn {
+      from { opacity:0; transform:scale(0.92) translateY(12px); filter:blur(6px); }
+      to   { opacity:1; transform:scale(1)    translateY(0);    filter:blur(0); }
+    }
+    @keyframes alFadeUp {
+      from { opacity:0; transform:translateY(8px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes alBarFill {
+      from { width:0%; }
+      to   { width:100%; }
+    }
+    @keyframes alDotPulse {
+      0%,100% { background:rgba(255,255,255,0.12); transform:scale(0.75); }
+      50%      { background:rgba(255,255,255,0.85); transform:scale(1.25); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #appLoader .al-logo,
+      #appLoader .al-bar-wrap,
+      #appLoader .al-dots,
+      #appLoader .al-fill,
+      #appLoader .al-dot { animation-duration: 0.01ms !important; }
+    }
   </style>
 </head>
 <body>
+
+  <!-- ── Post-Login Loading Screen ── -->
+  <div id="appLoader">
+    <img class="al-logo" src="1.6.png" alt="SEAMLINE">
+    <div class="al-bar-wrap">
+      <div class="al-track"><div class="al-fill"></div></div>
+      <div class="al-label">Loading your workspace</div>
+    </div>
+    <div class="al-dots">
+      <div class="al-dot"></div>
+      <div class="al-dot"></div>
+      <div class="al-dot"></div>
+    </div>
+  </div>
 
   <header>
     <div>
@@ -245,7 +345,6 @@
       <div id="clientProfilesTable"><div class="chart-empty" style="padding:40px;">No approved orders found.</div></div>
     </div>
   </div>
-
 
   <!-- PAYMENTS PANEL -->
   <div class="panel" id="panel-payments">
